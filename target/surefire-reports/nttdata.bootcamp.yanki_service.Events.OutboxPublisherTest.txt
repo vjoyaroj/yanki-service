@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: nttdata.bootcamp.yanki_service.Events.OutboxPublisherTest
+-------------------------------------------------------------------------------
+Tests run: 1, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 4.831 s -- in nttdata.bootcamp.yanki_service.Events.OutboxPublisherTest

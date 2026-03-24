@@ -1,0 +1,53 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="es"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>OutboxPublisher.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">yanki-service</a> &gt; <a href="index.source.html" class="el_package">nttdata.bootcamp.yanki_service.Events</a> &gt; <span class="el_source">OutboxPublisher.java</span></div><h1>OutboxPublisher.java</h1><pre class="source lang-java linenums">package nttdata.bootcamp.yanki_service.Events;
+
+import lombok.RequiredArgsConstructor;
+import nttdata.bootcamp.yanki_service.Entity.OutboxEventDocument;
+import nttdata.bootcamp.yanki_service.Repository.OutboxEventRepository;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
+
+import java.time.Instant;
+
+/**
+ * Scheduled job that publishes pending outbox events and updates status.
+ */
+@Component
+@RequiredArgsConstructor
+public class OutboxPublisher {
+    private final OutboxEventRepository outboxEventRepository;
+    private final KafkaEventProducer producer;
+
+    @Value(&quot;${yanki.outbox.publisher.batch-size:100}&quot;)
+    private int batchSize;
+
+    @Scheduled(fixedDelayString = &quot;${yanki.outbox.publisher.delay-ms:5000}&quot;)
+    public void publishPending() {
+<span class="fc" id="L28">        Flux&lt;OutboxEventDocument&gt; stream = outboxEventRepository</span>
+<span class="fc" id="L29">                .findTop100ByStatusOrderByCreatedAtAsc(OutboxEventDocument.STATUS_PENDING)</span>
+<span class="fc" id="L30">                .take(batchSize);</span>
+<span class="fc" id="L31">        stream.flatMap(this::publishOne).subscribe();</span>
+<span class="fc" id="L32">    }</span>
+
+    private Mono&lt;Void&gt; publishOne(OutboxEventDocument event) {
+<span class="fc" id="L35">        return producer.publish(event)</span>
+<span class="fc" id="L36">                .then(markPublished(event))</span>
+<span class="pc" id="L37">                .onErrorResume(ex -&gt; markFailed(event, ex.getMessage()));</span>
+    }
+
+    private Mono&lt;Void&gt; markPublished(OutboxEventDocument event) {
+<span class="fc" id="L41">        event.setStatus(OutboxEventDocument.STATUS_PUBLISHED);</span>
+<span class="fc" id="L42">        event.setPublishedAt(Instant.now());</span>
+<span class="fc" id="L43">        event.setLastError(null);</span>
+<span class="fc" id="L44">        return outboxEventRepository.save(event).then();</span>
+    }
+
+    private Mono&lt;Void&gt; markFailed(OutboxEventDocument event, String message) {
+<span class="nc bnc" id="L48" title="All 2 branches missed.">        event.setRetryCount((event.getRetryCount() == null ? 0 : event.getRetryCount()) + 1);</span>
+<span class="nc" id="L49">        event.setLastError(message);</span>
+<span class="nc" id="L50">        return outboxEventRepository.save(event).then();</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.11.202310140853</span></div></body></html>

@@ -1,0 +1,13 @@
+README.md
+pom.xml
+src/main/java/com/bank/yanki/api/ApiUtil.java
+src/main/java/com/bank/yanki/api/YankiApi.java
+src/main/java/com/bank/yanki/model/CreateWalletRequest.java
+src/main/java/com/bank/yanki/model/DocumentType.java
+src/main/java/com/bank/yanki/model/LinkDebitCardRequest.java
+src/main/java/com/bank/yanki/model/TopupRequest.java
+src/main/java/com/bank/yanki/model/WalletResponse.java
+src/main/java/com/bank/yanki/model/WalletStatus.java
+src/main/java/com/bank/yanki/model/WithdrawalRequest.java
+src/main/java/com/bank/yanki/model/YankiPaymentRequest.java
+src/main/java/com/bank/yanki/model/YankiPaymentResponse.java

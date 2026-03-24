@@ -1,0 +1,337 @@
+openapi: 3.0.3
+info:
+  title: Yanki API
+  description: Microservicio de monedero móvil Yanki
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8086/api/v1
+
+paths:
+  /yanki/wallets:
+    get:
+      summary: Listar monederos Yanki
+      operationId: listWallets
+      responses:
+        '200':
+          description: Lista de monederos
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/WalletResponse'
+    post:
+      summary: Crear un monedero Yanki
+      operationId: createWallet
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWalletRequest'
+      responses:
+        '201':
+          description: Monedero creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '400':
+          description: Solicitud inválida
+        '422':
+          description: Regla de negocio no cumplida
+
+  /yanki/wallets/{id}:
+    get:
+      summary: Obtener monedero por ID
+      operationId: getWalletById
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Monedero encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Monedero no encontrado
+
+  /yanki/wallets/by-phone/{phoneNumber}:
+    get:
+      summary: Obtener monedero por número de celular
+      operationId: getWalletByPhone
+      parameters:
+        - name: phoneNumber
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Monedero encontrado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Monedero no encontrado
+
+  /yanki/wallets/{walletId}/link-debit-card:
+    post:
+      summary: Vincular monedero a una tarjeta de débito del banco
+      operationId: linkDebitCard
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LinkDebitCardRequest'
+      responses:
+        '200':
+          description: Tarjeta vinculada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Monedero no encontrado
+        '422':
+          description: Regla de negocio no cumplida
+
+  /yanki/wallets/{walletId}/unlink-debit-card:
+    post:
+      summary: Desvincular monedero de la tarjeta de débito
+      operationId: unlinkDebitCard
+      parameters:
+        - name: walletId
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Tarjeta desvinculada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Monedero no encontrado
+
+  /yanki/topups:
+    post:
+      summary: Fondear monedero desde la cuenta principal asociada a la tarjeta
+      operationId: topup
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/TopupRequest'
+      responses:
+        '201':
+          description: Fondeo realizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Monedero no encontrado
+        '422':
+          description: Regla de negocio no cumplida
+
+  /yanki/withdrawals:
+    post:
+      summary: Retirar saldo del monedero hacia la cuenta principal asociada a la tarjeta
+      operationId: withdraw
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/WithdrawalRequest'
+      responses:
+        '201':
+          description: Retiro realizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WalletResponse'
+        '404':
+          description: Monedero no encontrado
+        '422':
+          description: Regla de negocio no cumplida
+
+  /yanki/payments:
+    post:
+      summary: Enviar pago P2P entre monederos por número de celular
+      operationId: createPayment
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/YankiPaymentRequest'
+      responses:
+        '201':
+          description: Pago realizado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/YankiPaymentResponse'
+        '404':
+          description: Monedero no encontrado
+        '422':
+          description: Regla de negocio no cumplida
+
+components:
+  schemas:
+    DocumentType:
+      type: string
+      enum:
+        - DNI
+        - CEX
+        - PASSPORT
+
+    WalletStatus:
+      type: string
+      enum:
+        - ACTIVE
+        - BLOCKED
+        - CLOSED
+
+    CreateWalletRequest:
+      type: object
+      required:
+        - documentType
+        - documentNumber
+        - phoneNumber
+        - imei
+        - email
+      properties:
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+        documentNumber:
+          type: string
+        phoneNumber:
+          type: string
+          description: Número de celular (único)
+        imei:
+          type: string
+        email:
+          type: string
+          format: email
+
+    WalletResponse:
+      type: object
+      properties:
+        id:
+          type: string
+        documentType:
+          $ref: '#/components/schemas/DocumentType'
+        documentNumber:
+          type: string
+        phoneNumber:
+          type: string
+        imei:
+          type: string
+        email:
+          type: string
+          format: email
+        status:
+          $ref: '#/components/schemas/WalletStatus'
+        balance:
+          type: number
+          format: double
+        linkedDebitCardId:
+          type: string
+          nullable: true
+        createdAt:
+          type: string
+          format: date-time
+
+    LinkDebitCardRequest:
+      type: object
+      required:
+        - debitCardId
+      properties:
+        debitCardId:
+          type: string
+
+    TopupRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
+          type: string
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+
+    WithdrawalRequest:
+      type: object
+      required:
+        - walletId
+        - amount
+      properties:
+        walletId:
+          type: string
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+
+    YankiPaymentRequest:
+      type: object
+      required:
+        - senderPhoneNumber
+        - receiverPhoneNumber
+        - amount
+      properties:
+        senderPhoneNumber:
+          type: string
+        receiverPhoneNumber:
+          type: string
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+        idempotencyKey:
+          type: string
+          description: Clave para evitar duplicados (opcional)
+
+    YankiPaymentResponse:
+      type: object
+      properties:
+        paymentId:
+          type: string
+        senderWalletId:
+          type: string
+        receiverWalletId:
+          type: string
+        amount:
+          type: number
+          format: double
+        description:
+          type: string
+        createdAt:
+          type: string
+          format: date-time

@@ -1,0 +1,10 @@
+GROUP,PACKAGE,CLASS,INSTRUCTION_MISSED,INSTRUCTION_COVERED,BRANCH_MISSED,BRANCH_COVERED,LINE_MISSED,LINE_COVERED,COMPLEXITY_MISSED,COMPLEXITY_COVERED,METHOD_MISSED,METHOD_COVERED
+yanki-service,nttdata.bootcamp.yanki_service.Rules,P2pPaymentRules,47,30,10,4,10,5,8,3,2,2
+yanki-service,nttdata.bootcamp.yanki_service.Rules,AccountFundingRules,36,0,8,0,7,0,7,0,3,0
+yanki-service,nttdata.bootcamp.yanki_service.Rules,DebitCardPrimaryAccountResolver,65,0,8,0,13,0,8,0,4,0
+yanki-service,nttdata.bootcamp.yanki_service.Rules,YankiMovementFactory,72,0,0,0,36,0,5,0,5,0
+yanki-service,nttdata.bootcamp.yanki_service.Rules,DebitCardLinkRules,32,0,8,0,6,0,6,0,2,0
+yanki-service,nttdata.bootcamp.yanki_service.Rules,WalletOperationalRules,67,0,14,0,14,0,12,0,5,0
+yanki-service,nttdata.bootcamp.yanki_service.Events,OutboxPublisher,28,44,2,0,3,12,3,3,2,3
+yanki-service,nttdata.bootcamp.yanki_service.Exception,GlobalExceptionHandler,64,0,0,0,13,0,5,0,5,0
+yanki-service,nttdata.bootcamp.yanki_service.Exception,BusinessRuleException,0,4,0,0,0,2,0,1,0,1

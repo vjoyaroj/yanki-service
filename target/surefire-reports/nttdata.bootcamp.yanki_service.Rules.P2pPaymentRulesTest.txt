@@ -1,0 +1,4 @@
+-------------------------------------------------------------------------------
+Test set: nttdata.bootcamp.yanki_service.Rules.P2pPaymentRulesTest
+-------------------------------------------------------------------------------
+Tests run: 2, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 0.113 s -- in nttdata.bootcamp.yanki_service.Rules.P2pPaymentRulesTest
